@@ -53,7 +53,7 @@ public class LoginScreen extends Application {
         primaryStage.show();
     }
 
-    public static void lmain(String[] args) {
+    public static void main(String[] args) {
         launch(args);
     }
 }
