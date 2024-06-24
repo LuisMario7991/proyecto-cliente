@@ -13,18 +13,16 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class conexion {
-        final static String SERVER_ADDRESS = "localhost";
-        final static int SERVER_PORT = 12345;
+    final static String SERVER_ADDRESS = "localhost";
+    final static int SERVER_PORT = 12345;
 
-        static Socket socket;
-        public static void show(Stage secondStage) throws IOException {
-        
+    static Socket socket;
+
+    public static void show(Stage secondStage) throws IOException {
+
         ObjectInputStream ois;
         ObjectOutputStream oos;
 
-        
-   
-        
         try {
             // Conectar al servidor
             socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
@@ -79,16 +77,16 @@ public class conexion {
 
             btnFirmarAcuerdo.setOnAction(e -> {
                 try {
-                     // Generar las llaves RSA
-                        GenerateKeys.generate();
+                    // Generar las llaves RSA
+                    GenerateKeys.generate();
 
-                        // Aplicar el hash y encriptar con la llave privada
-                        HashAndEncrypt.hashAndEncrypt();
-                        enviarArchivo();
-                     } catch (Exception e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
+                    // Aplicar el hash y encriptar con la llave privada
+                    HashAndEncrypt.hashAndEncrypt();
+                    enviarArchivo();
+                } catch (Exception e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
             });
             btnDesencriptarReceta.setOnAction(e -> desencriptarReceta());
             btnSalir.setOnAction(e -> cerrarConexion());
@@ -104,11 +102,9 @@ public class conexion {
         }
     }
 
-    
-
     private static void enviarArchivo() throws IOException {
-        
-        String[] filePaths = {"m.txt","encrypted_hash.bin","publicKey.pem"}; 
+
+        String[] filePaths = { "m.txt", "encrypted_hash.bin", "publicKey.pem" };
         for (String filePath : filePaths) {
             enviarArch(filePath);
         }
@@ -119,54 +115,57 @@ public class conexion {
     }
 
     private static void cerrarConexion() {
-       /*  try {
-            // Cerrar flujos y socket
-            if (ois != null) ois.close();
-            if (oos != null) oos.close();
-            if (socket != null && !socket.isClosed()) socket.close();
-            System.out.println("Conexión cerrada correctamente.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        /*
+         * try {
+         * // Cerrar flujos y socket
+         * if (ois != null) ois.close();
+         * if (oos != null) oos.close();
+         * if (socket != null && !socket.isClosed()) socket.close();
+         * System.out.println("Conexión cerrada correctamente.");
+         * } catch (IOException e) {
+         * e.printStackTrace();
+         * }
+         */
     }
 
     private static String bytesToHex(byte[] bytes) {
         StringBuilder hexString = new StringBuilder();
         for (byte b : bytes) {
             String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) hexString.append('0');
+            if (hex.length() == 1)
+                hexString.append('0');
             hexString.append(hex);
         }
         return hexString.toString();
     }
 
-    public static  void enviarArch(String filePath) throws IOException {
+    public static void enviarArch(String filePath) throws IOException {
         OutputStream outputStream = socket.getOutputStream();
-       
-        FileInputStream fileInputStream = new FileInputStream(filePath); {
 
-       File file = new File(filePath);
-       long fileSize = file.length();
-       String fileName = file.getName();
+        FileInputStream fileInputStream = new FileInputStream(filePath);
+        {
 
-       // Enviar el nombre del archivo y su tamaño
-       DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-       dataOutputStream.writeUTF(fileName);
-       dataOutputStream.writeLong(fileSize);
+            File file = new File(filePath);
+            long fileSize = file.length();
+            String fileName = file.getName();
 
-       System.out.println("Enviando archivo: " + fileName + " de tamaño: " + fileSize + " bytes");
+            // Enviar el nombre del archivo y su tamaño
+            DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+            dataOutputStream.writeUTF(fileName);
+            dataOutputStream.writeLong(fileSize);
 
-       byte[] buffer = new byte[1024];
-       int bytesRead;
-       while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-           outputStream.write(buffer, 0, bytesRead);
-       }
+            System.out.println("Enviando archivo: " + fileName + " de tamaño: " + fileSize + " bytes");
 
-       System.out.println("Archivo " + fileName + " enviado al servidor.");
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
 
-  
+            System.out.println("Archivo " + fileName + " enviado al servidor.");
+
+        }
+
     }
 
-    }
-     
 }
