@@ -23,7 +23,12 @@ public class LoginScreen extends Application {
             String usuario = userField.getText();
             String contraseña = passwordField.getText();
             if (validarUsuario(usuario, contraseña)) {
-                conexion.showMainInterface(primaryStage); // Llama a la interfaz principal después de la autenticación
+                try {
+                    conexion.connectAndSetupKeys();
+                    conexion.showMainInterface(primaryStage);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
             }
         });
 

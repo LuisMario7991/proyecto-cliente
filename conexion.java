@@ -31,6 +31,8 @@ public class conexion {
             BigInteger p = (BigInteger) ois.readObject();
             BigInteger g = (BigInteger) ois.readObject();
             int l = ois.readInt();
+            System.out.println("Parámetros Diffie-Hellman recibidos de Bob.");
+
             DHParameterSpec dhSpec = new DHParameterSpec(p, g, l);
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
             keyPairGen.initialize(dhSpec);
@@ -38,22 +40,28 @@ public class conexion {
             PublicKey publicKey = keyPair.getPublic();
             PrivateKey privateKey = keyPair.getPrivate();
 
-            // Intercambio de claves públicas
+            // Recibir clave pública de Bob
             PublicKey bobPublicKey = (PublicKey) ois.readObject();
+            if (!validatePublicKey(bobPublicKey)) {
+                throw new IllegalArgumentException("Clave pública recibida es inválida");
+            }
+            System.out.println("Clave pública de Bob recibida y validada.");
+
+            // Enviar clave pública a Bob
             oos.writeObject(publicKey);
             oos.flush();
+            System.out.println("Clave pública de Alice enviada a Bob.");
 
             // Generar la clave compartida
             KeyAgreement keyAgree = KeyAgreement.getInstance("DH");
             keyAgree.init(privateKey);
             keyAgree.doPhase(bobPublicKey, true);
             byte[] sharedSecret = keyAgree.generateSecret();
+
+            // Calcular hash SHA-256 de la clave compartida
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
             byte[] sharedSecretHash = sha256.digest(sharedSecret);
             System.out.println("Clave compartida hash (Alice): " + bytesToHex(sharedSecretHash));
-
-            // Mostrar la interfaz principal
-            showMainInterface(new Stage());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -100,5 +108,11 @@ public class conexion {
             hexString.append(hex);
         }
         return hexString.toString();
+    }
+
+    private static boolean validatePublicKey(PublicKey key) {
+        // Implementación de ejemplo: validar la especificación de la clave y cualquier
+        // otra propiedad necesaria
+        return key.getAlgorithm().equals("DH") && key.getEncoded().length > 0;
     }
 }
