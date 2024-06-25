@@ -1,5 +1,3 @@
-import java.io.IOException;
-
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -24,18 +22,9 @@ public class LoginScreen extends Application {
             // Validar usuario y contraseña (simulado)
             String usuario = userField.getText();
             String contraseña = passwordField.getText();
-
-            // Aquí podrías realizar validaciones adicionales
-
-            // Llamar a la segunda ventana (MessageWindow)
-            try {
-                conexion.show(primaryStage);
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+            if (validarUsuario(usuario, contraseña)) {
+                conexion.showMainInterface(primaryStage); // Llama a la interfaz principal después de la autenticación
             }
-
-           
         });
 
         // Configurar el diseño del grid para organizar los elementos
@@ -53,7 +42,12 @@ public class LoginScreen extends Application {
         primaryStage.show();
     }
 
-    public static void main(String[] args) {
+    public static void initialize(String[] args) {
         launch(args);
+    }
+
+    private boolean validarUsuario(String usuario, String contraseña) {
+        // Implementa tu lógica de validación aquí
+        return true; // Solo como ejemplo
     }
 }
