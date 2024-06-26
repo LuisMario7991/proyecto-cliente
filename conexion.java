@@ -16,7 +16,7 @@ public class conexion {
     static Socket socket;
     private static ObjectOutputStream oos;
     private static ObjectInputStream ois;
-
+    
     public static void main(String[] args) {
         try {
             connect();
@@ -28,11 +28,13 @@ public class conexion {
     }
 
     public static void connect() throws Exception {
+        
         while (true) {
             try {
                 socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 ois = new ObjectInputStream(socket.getInputStream());
+               
                 break;
             } catch (Exception e) {
                 Thread.sleep(1000);
@@ -103,7 +105,9 @@ public class conexion {
     }
 
     private static void enviarArchivo() {
-        // Implementación de envío de archivo
+        // Implementación para enviar archivo
+
+        
     }
 
     private static void desencriptarReceta() {
