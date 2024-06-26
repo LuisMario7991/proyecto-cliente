@@ -61,7 +61,7 @@ public class conexion {
         BigInteger p = (BigInteger) objectInputStream.readObject();
         BigInteger g = (BigInteger) objectInputStream.readObject();
         int l = objectInputStream.readInt();
-        System.out.println("Parámetros Diffie-Hellman recibidataOutputStream de Bob.");
+        System.out.println("Parámetros Diffie-Hellman recibidos de Bob.");
 
         DHParameterSpec dhSpec = new DHParameterSpec(p, g, l);
         KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
@@ -133,6 +133,10 @@ public class conexion {
             try {
                 GenerateKeys.generate();
                 HashAndEncrypt.hashAndEncrypt();
+
+                dataOutputStream.writeUTF("recibirArchivo");
+                dataOutputStream.flush();
+
                 enviarArchivo();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -294,6 +298,7 @@ public class conexion {
         DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
         dataOutputStream.writeUTF(fileName);
         dataOutputStream.writeLong(fileSize);
+        dataOutputStream.flush();
 
         System.out.println("Enviando archivo: " + fileName + " de tamaño: " + fileSize + " bytes");
 
@@ -301,6 +306,7 @@ public class conexion {
         int bytesRead;
         while ((bytesRead = fileInputStream.read(buffer)) != -1) {
             outputStream.write(buffer, 0, bytesRead);
+            outputStream.flush();
         }
 
         fileInputStream.close();
