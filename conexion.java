@@ -22,48 +22,52 @@ public class conexion {
     }
 
     public static void connectAndSetupKeys() throws Exception {
-        try {
-            socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            ois = new ObjectInputStream(socket.getInputStream());
+        while (true) {
+            try {
+                socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
+                oos = new ObjectOutputStream(socket.getOutputStream());
+                ois = new ObjectInputStream(socket.getInputStream());
 
-            // Recibir y generar parámetros Diffie-Hellman
-            BigInteger p = (BigInteger) ois.readObject();
-            BigInteger g = (BigInteger) ois.readObject();
-            int l = ois.readInt();
-            System.out.println("Parámetros Diffie-Hellman recibidos de Bob.");
+                // Recibir y generar parámetros Diffie-Hellman
+                BigInteger p = (BigInteger) ois.readObject();
+                BigInteger g = (BigInteger) ois.readObject();
+                int l = ois.readInt();
+                System.out.println("Parámetros Diffie-Hellman recibidos de Bob.");
 
-            DHParameterSpec dhSpec = new DHParameterSpec(p, g, l);
-            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
-            keyPairGen.initialize(dhSpec);
-            KeyPair keyPair = keyPairGen.generateKeyPair();
-            PublicKey publicKey = keyPair.getPublic();
-            PrivateKey privateKey = keyPair.getPrivate();
+                DHParameterSpec dhSpec = new DHParameterSpec(p, g, l);
+                KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("DH");
+                keyPairGen.initialize(dhSpec);
+                KeyPair keyPair = keyPairGen.generateKeyPair();
+                PublicKey publicKey = keyPair.getPublic();
+                PrivateKey privateKey = keyPair.getPrivate();
 
-            // Recibir clave pública de Bob
-            PublicKey bobPublicKey = (PublicKey) ois.readObject();
-            if (!validatePublicKey(bobPublicKey)) {
-                throw new IllegalArgumentException("Clave pública recibida es inválida");
+                // Recibir clave pública de Bob
+                PublicKey bobPublicKey = (PublicKey) ois.readObject();
+                if (!validatePublicKey(bobPublicKey)) {
+                    throw new IllegalArgumentException("Clave pública recibida es inválida");
+                }
+                System.out.println("Clave pública de Bob recibida y validada.");
+
+                // Enviar clave pública a Bob
+                oos.writeObject(publicKey);
+                oos.flush();
+                System.out.println("Clave pública de Alice enviada a Bob.");
+
+                // Generar la clave compartida
+                KeyAgreement keyAgree = KeyAgreement.getInstance("DH");
+                keyAgree.init(privateKey);
+                keyAgree.doPhase(bobPublicKey, true);
+                byte[] sharedSecret = keyAgree.generateSecret();
+
+                // Calcular hash SHA-256 de la clave compartida
+                MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+                byte[] sharedSecretHash = sha256.digest(sharedSecret);
+                System.out.println("Clave compartida hash (Alice): " + bytesToHex(sharedSecretHash));
+
+                break;
+            } catch (Exception e) {
+                Thread.sleep(100);
             }
-            System.out.println("Clave pública de Bob recibida y validada.");
-
-            // Enviar clave pública a Bob
-            oos.writeObject(publicKey);
-            oos.flush();
-            System.out.println("Clave pública de Alice enviada a Bob.");
-
-            // Generar la clave compartida
-            KeyAgreement keyAgree = KeyAgreement.getInstance("DH");
-            keyAgree.init(privateKey);
-            keyAgree.doPhase(bobPublicKey, true);
-            byte[] sharedSecret = keyAgree.generateSecret();
-
-            // Calcular hash SHA-256 de la clave compartida
-            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            byte[] sharedSecretHash = sha256.digest(sharedSecret);
-            System.out.println("Clave compartida hash (Alice): " + bytesToHex(sharedSecretHash));
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
