@@ -24,8 +24,7 @@ public class LoginScreen extends Application {
             String contraseña = passwordField.getText();
             if (validarUsuario(usuario, contraseña)) {
                 try {
-                    conexion.connectAndSetupKeys();
-                    conexion.showMainInterface(primaryStage);
+                    conexion.showColaboratorInterface(primaryStage);
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
@@ -43,7 +42,7 @@ public class LoginScreen extends Application {
         // Configurar la escena principal y mostrar la ventana
         Scene scene = new Scene(grid, 300, 150);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Login");
+        primaryStage.setTitle("User Login");
         primaryStage.show();
     }
 
