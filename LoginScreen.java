@@ -2,6 +2,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -14,7 +15,7 @@ public class LoginScreen extends Application {
         Label userLabel = new Label("Usuario:");
         Label passwordLabel = new Label("Contraseña:");
         TextField userField = new TextField();
-        TextField passwordField = new TextField();
+        PasswordField passwordField = new PasswordField();
         Button loginButton = new Button("Iniciar sesión");
 
         // Configurar el evento del botón de inicio de sesión
