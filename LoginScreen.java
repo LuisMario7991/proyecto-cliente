@@ -22,12 +22,16 @@ public class LoginScreen extends Application {
             // Validar usuario y contraseña (simulado)
             String usuario = userField.getText();
             String contraseña = passwordField.getText();
-            if (validarUsuario(usuario, contraseña)) {
-                try {
-                    conexion.showColaboratorInterface(primaryStage);
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
+
+            if (usuario.isEmpty() || contraseña.isEmpty()) {
+                start(primaryStage);
+            }
+
+            try {
+                String userType = conexion.login(usuario, contraseña);
+                conexion.displayUserInterface(userType, primaryStage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         });
 
