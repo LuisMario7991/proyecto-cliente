@@ -40,6 +40,9 @@ public class conexion {
         while (true) {
             try {
                 socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
+                
+                System.out.println("Esperando recibir parámetros Diffie-Hellman");
+
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
                 dataInputStream = new DataInputStream(socket.getInputStream());
@@ -52,6 +55,8 @@ public class conexion {
     }
 
     public static void setupKeys() throws Exception {
+        System.out.println("Recibiendo parámetros Diffie-Hellman");
+
         // Recibir y generar parámetros Diffie-Hellman
         BigInteger p = (BigInteger) objectInputStream.readObject();
         BigInteger g = (BigInteger) objectInputStream.readObject();
@@ -158,15 +163,18 @@ public class conexion {
         eliminarButton.setOnAction(e -> eliminaUsuario());
         salirButton.setOnAction(e -> System.exit(0));
 
-        VBox vbox = new VBox(10, subirButton, compartirButton, validarButton, agregarButton, eliminarButton, salirButton);
+        VBox vbox = new VBox(10, subirButton, compartirButton, validarButton, agregarButton, eliminarButton,
+                salirButton);
         Scene scene = new Scene(vbox, 300, 200);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private static void enviarArchivo() {
-        // Implementación para enviar archivo
-
+    private static void enviarArchivo() throws IOException {
+        String[] filePaths = { "m.txt", "encrypted_hash.bin", "publicKey.pem" };
+        for (String filePath : filePaths) {
+            enviarArch(filePath);
+        }
     }
 
     private static void desencriptarReceta() {
@@ -271,5 +279,32 @@ public class conexion {
         // Implementación de ejemplo: validar la especificación de la clave y cualquier
         // otra propiedad necesaria
         return key.getAlgorithm().equals("DH") && key.getEncoded().length > 0;
+    }
+
+    public static void enviarArch(String filePath) throws IOException {
+        OutputStream outputStream = socket.getOutputStream();
+
+        FileInputStream fileInputStream = new FileInputStream(filePath);
+
+        File file = new File(filePath);
+        long fileSize = file.length();
+        String fileName = file.getName();
+
+        // Enviar el nombre del archivo y su tamaño
+        DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+        dataOutputStream.writeUTF(fileName);
+        dataOutputStream.writeLong(fileSize);
+
+        System.out.println("Enviando archivo: " + fileName + " de tamaño: " + fileSize + " bytes");
+
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+
+        fileInputStream.close();
+
+        System.out.println("Archivo " + fileName + " enviado al servidor.");
     }
 }
