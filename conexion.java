@@ -40,7 +40,7 @@ public class conexion {
         while (true) {
             try {
                 socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-                
+
                 System.out.println("Esperando recibir parámetros Diffie-Hellman");
 
                 objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
@@ -129,26 +129,58 @@ public class conexion {
         Button btnDesencriptarReceta = new Button("Desencriptar Receta");
         Button btnSalir = new Button("Salir");
 
-        btnFirmarAcuerdo.setOnAction(e -> {
-            try {
-                GenerateKeys.generate();
-                HashAndEncrypt.hashAndEncrypt();
-
-                dataOutputStream.writeUTF("recibirArchivo");
-                dataOutputStream.flush();
-
-                enviarArchivo();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        });
+        btnFirmarAcuerdo.setOnAction(e -> firmarAcuerdo());
         btnDesencriptarReceta.setOnAction(e -> desencriptarReceta());
-        btnSalir.setOnAction(e -> System.exit(0));
+        btnSalir.setOnAction(e -> {
+            cerrarConexion();
+            primaryStage.close();
+        });
 
         VBox vbox = new VBox(btnFirmarAcuerdo, btnDesencriptarReceta, btnSalir);
         Scene scene = new Scene(vbox, 300, 200);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private static void firmarAcuerdo() {
+        try {
+            GenerateKeys.generate();
+            HashAndEncrypt.hashAndEncrypt();
+
+            dataOutputStream.writeUTF("recibirArchivo");
+            dataOutputStream.flush();
+
+            enviarArchivo();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static void cerrarConexion() {
+        try {
+            dataOutputStream.writeUTF("terminaConexion");
+            dataOutputStream.flush();
+
+            if (objectInputStream != null)
+                objectInputStream.close();
+
+            if (objectOutputStream != null)
+                objectOutputStream.close();
+
+            if (dataInputStream != null)
+                dataInputStream.close();
+
+            if (dataOutputStream != null)
+                dataOutputStream.close();
+
+            if (socket != null && !socket.isClosed())
+                socket.close();
+
+            System.out.println("Conexión cerrada correctamente.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("No se pudo cerrar correctamente la conexión: " + e.getMessage());
+        }
     }
 
     public static void showAdminInterface(Stage primaryStage) {
@@ -165,7 +197,10 @@ public class conexion {
         // validarButton.setOnAction(e -> validarArchivo());
         agregarButton.setOnAction(e -> agregaUsuario());
         eliminarButton.setOnAction(e -> eliminaUsuario());
-        salirButton.setOnAction(e -> System.exit(0));
+        salirButton.setOnAction(e -> {
+            cerrarConexion();
+            primaryStage.close();
+        });
 
         VBox vbox = new VBox(10, subirButton, compartirButton, validarButton, agregarButton, eliminarButton,
                 salirButton);
