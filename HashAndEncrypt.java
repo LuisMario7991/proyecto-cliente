@@ -1,10 +1,10 @@
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
-import java.security.Signature;
-import java.security.KeyFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
+import javax.crypto.Cipher;
 
 public class HashAndEncrypt {
     public static void hashAndEncrypt() throws Exception {
@@ -21,13 +21,12 @@ public class HashAndEncrypt {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
 
-        // Firmar el hash con la llave privada
-        Signature signature = Signature.getInstance("SHA256withRSA");
-        signature.initSign(privateKey);
-        signature.update(hash);
-        byte[] signedHash = signature.sign();
+        // Cifrar el hash con la llave privada
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+        byte[] encryptedHash = cipher.doFinal(hash);
 
-        // Guardar el hash firmado en un archivo
-        Files.write(Paths.get("encrypted_hash.bin"), signedHash);
+        // Guardar el hash cifrado en un archivo
+        Files.write(Paths.get("encrypted_hash.bin"), encryptedHash);
     }
 }

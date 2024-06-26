@@ -39,6 +39,7 @@ public class conexion {
     }
 
     public static void connect() throws Exception {
+        
         while (true) {
             try {
                 socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
@@ -165,7 +166,9 @@ public class conexion {
     }
 
     private static void enviarArchivo() {
-        // Implementación de envío de archivo
+        // Implementación para enviar archivo
+
+        
     }
 
     private static void desencriptarReceta() {
