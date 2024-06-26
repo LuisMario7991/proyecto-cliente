@@ -53,9 +53,4 @@ public class LoginScreen extends Application {
     public static void initialize(String[] args) {
         launch(args);
     }
-
-    private boolean validarUsuario(String usuario, String contraseña) {
-        // Implementa tu lógica de validación aquí
-        return true; // Solo como ejemplo
-    }
 }
