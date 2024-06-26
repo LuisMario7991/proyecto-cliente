@@ -2,9 +2,6 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.*;
 import java.security.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 import javax.crypto.*;
 import javax.crypto.spec.*;
@@ -39,7 +36,7 @@ public class conexion {
     }
 
     public static void connect() throws Exception {
-        
+
         while (true) {
             try {
                 socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
@@ -152,14 +149,16 @@ public class conexion {
         Button validarButton = new Button("Validar");
         Button agregarButton = new Button("Agregar usuario");
         Button eliminarButton = new Button("Eliminar usuario");
+        Button salirButton = new Button("Salir");
 
         // subirButton.setOnAction(e -> subirArchivo());
         // compartirButton.setOnAction(e -> compartirArchivo());
         // validarButton.setOnAction(e -> validarArchivo());
         agregarButton.setOnAction(e -> agregaUsuario());
         eliminarButton.setOnAction(e -> eliminaUsuario());
+        salirButton.setOnAction(e -> System.exit(0));
 
-        VBox vbox = new VBox(10, subirButton, compartirButton, validarButton, agregarButton, eliminarButton);
+        VBox vbox = new VBox(10, subirButton, compartirButton, validarButton, agregarButton, eliminarButton, salirButton);
         Scene scene = new Scene(vbox, 300, 200);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -168,7 +167,6 @@ public class conexion {
     private static void enviarArchivo() {
         // Implementación para enviar archivo
 
-        
     }
 
     private static void desencriptarReceta() {
@@ -193,6 +191,31 @@ public class conexion {
         grid.add(typeComboBox, 1, 2);
         grid.add(addButton, 1, 3);
 
+        addButton.setOnAction(e -> {
+            try {
+                // Envía los datos del nuevo usuario al servidor
+                dataOutputStream.writeUTF("agregaUsuario");
+                dataOutputStream.flush();
+
+                dataOutputStream.writeUTF(emailField.getText());
+                dataOutputStream.flush();
+
+                dataOutputStream.writeUTF(passwordField.getText());
+                dataOutputStream.flush();
+
+                dataOutputStream.writeUTF(typeComboBox.getValue());
+                dataOutputStream.flush();
+
+                // Espera una respuesta del servidor
+                String serverResponse = dataInputStream.readUTF();
+                System.out.println("Respuesta del servidor: " + serverResponse);
+
+                stage.close(); // Cierra la ventana tras la respuesta
+            } catch (IOException ex) {
+                System.err.println("Error en el envío de parámetros al servidor: " + ex.getMessage());
+            }
+        });
+
         Scene scene = new Scene(grid);
         stage.setScene(scene);
         stage.show();
@@ -208,6 +231,25 @@ public class conexion {
         grid.add(new Label("Email del usuario a eliminar:"), 0, 0);
         grid.add(emailField, 1, 0);
         grid.add(deleteButton, 1, 1);
+
+        deleteButton.setOnAction(e -> {
+            try {
+                // Envía los datos del nuevo usuario al servidor
+                dataOutputStream.writeUTF("eliminaUsuario");
+                dataOutputStream.flush();
+
+                dataOutputStream.writeUTF(emailField.getText());
+                dataOutputStream.flush();
+
+                // Espera una respuesta del servidor
+                String serverResponse = dataInputStream.readUTF();
+                System.out.println("Respuesta del servidor: " + serverResponse);
+
+                stage.close(); // Cierra la ventana tras la respuesta
+            } catch (IOException ex) {
+                System.err.println("Error en el envío de parámetros al servidor: " + ex.getMessage());
+            }
+        }); // Cierra la ventana tras la respuesta
 
         Scene scene = new Scene(grid);
         stage.setScene(scene);
