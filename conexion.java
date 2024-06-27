@@ -1,10 +1,15 @@
 import java.io.*;
 import java.math.BigInteger;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.*;
 import javax.crypto.spec.*;
+import javax.swing.JFileChooser;
+
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -192,9 +197,9 @@ public class conexion {
         Button eliminarButton = new Button("Eliminar usuario");
         Button salirButton = new Button("Salir");
 
-        // subirButton.setOnAction(e -> subirArchivo());
-        // compartirButton.setOnAction(e -> compartirArchivo());
-        // validarButton.setOnAction(e -> validarArchivo());
+        subirButton.setOnAction(e -> subirArchivo());
+        compartirButton.setOnAction(e -> compartirArchivo());
+        validarButton.setOnAction(e -> validarArchivo());
         agregarButton.setOnAction(e -> agregaUsuario());
         eliminarButton.setOnAction(e -> eliminaUsuario());
         salirButton.setOnAction(e -> {
@@ -207,6 +212,80 @@ public class conexion {
         Scene scene = new Scene(vbox, 300, 200);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private static void validarArchivo() {
+        try {
+            // Aplicar hash SHA-256 al archivo 'm.txt'
+            byte[] fileHash;
+            fileHash = hashFile("received_m.txt");
+            PublicKey publicKey = getPublicKeyFromFile("receivedPublicKey.pem");
+
+            byte[] decryptedHash = decryptWithPublicKey("received_encrypted_hash.bin",
+                    publicKey);
+
+            // Aplicar hash SHA-256 al resultado del descifrado
+            byte[] decryptedHashFileHash = hashBytes(decryptedHash);
+
+            // Comparar los hashes
+            boolean isMatch = MessageDigest.isEqual(fileHash, decryptedHashFileHash);
+            System.out.println("Hash comparison result: " + (isMatch ? "MATCH" : "DO NOT MATCH"));
+            System.out.println("Validando archivo...");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void compartirArchivo() {
+        // Lógica para compartir archivo
+        System.out.println("Compartiendo archivo...");
+        // Aquí se debería implementar la lógica para enviar el archivo al cliente
+        // mediante sockets
+        // Ejemplo básico:
+        // enviarArchivoAlCliente();
+    }
+
+    private static void subirArchivo() {
+        // Crear un selector de archivos usando JFileChooser
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            try {
+                File selectedFile = fileChooser.getSelectedFile();
+
+                OutputStream outputStream;
+                outputStream = socket.getOutputStream();
+
+                FileInputStream fileInputStream = new FileInputStream(selectedFile);
+
+                long fileSize = selectedFile.length();
+                String fileName = selectedFile.getName();
+
+                // Enviar el nombre del archivo y su tamaño
+                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                dataOutputStream.writeUTF(fileName);
+                dataOutputStream.writeLong(fileSize);
+                dataOutputStream.flush();
+
+                System.out.println("Enviando archivo: " + fileName + " de tamaño: " + fileSize + " bytes");
+
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                    outputStream.flush();
+                }
+
+                fileInputStream.close();
+
+                System.out.println("Archivo " + fileName + " enviado al servidor.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     private static void enviarArchivo() throws IOException {
@@ -301,6 +380,32 @@ public class conexion {
         Scene scene = new Scene(grid);
         stage.setScene(scene);
         stage.show();
+    }
+
+    private static byte[] hashBytes(byte[] data) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        return digest.digest(data);
+    }
+
+    private static byte[] hashFile(String filePath) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] fileBytes = Files.readAllBytes(Paths.get(filePath));
+        return digest.digest(fileBytes);
+    }
+
+    private static PublicKey getPublicKeyFromFile(String filePath) throws Exception {
+        byte[] publicKeyBytes = Files.readAllBytes(Paths.get(filePath));
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePublic(keySpec);
+    }
+
+    private static byte[] decryptWithPublicKey(String filePath, PublicKey publicKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, publicKey);
+
+        byte[] encryptedData = Files.readAllBytes(Paths.get(filePath));
+        return cipher.doFinal(encryptedData);
     }
 
     private static String bytesToHex(byte[] bytes) {
