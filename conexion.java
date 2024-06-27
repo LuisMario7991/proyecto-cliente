@@ -30,6 +30,8 @@ public class conexion {
     private static DataOutputStream dataOutputStream;
     private static DataInputStream dataInputStream;
 
+    private static Commands command = new Commands();
+
     public static void main(String[] args) {
         try {
             connect();
@@ -99,7 +101,6 @@ public class conexion {
         System.out.println("Clave compartida hash (Alice): " + bytesToHex(sharedSecretHash));
     }
 
-    // @SuppressWarnings("unused")
     protected static String login(String email, String password) {
         try {
             dataOutputStream.writeUTF(email);
@@ -151,11 +152,7 @@ public class conexion {
         try {
             GenerateKeys.generate();
             HashAndEncrypt.hashAndEncrypt();
-
-            dataOutputStream.writeUTF("recibirArchivo");
-            dataOutputStream.flush();
-
-            enviarArchivo();
+            enviarFirma();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -163,7 +160,7 @@ public class conexion {
 
     private static void cerrarConexion() {
         try {
-            dataOutputStream.writeUTF("terminaConexion");
+            dataOutputStream.writeUTF(command.getFinishConnection());
             dataOutputStream.flush();
 
             if (objectInputStream != null)
@@ -288,10 +285,10 @@ public class conexion {
 
     }
 
-    private static void enviarArchivo() throws IOException {
+    private static void enviarFirma() throws IOException {
         String[] filePaths = { "m.txt", "encrypted_hash.bin", "publicKey.pem" };
         for (String filePath : filePaths) {
-            enviarArch(filePath);
+            enviarArchivo(filePath);
         }
     }
 
@@ -320,7 +317,7 @@ public class conexion {
         addButton.setOnAction(e -> {
             try {
                 // Envía los datos del nuevo usuario al servidor
-                dataOutputStream.writeUTF("agregaUsuario");
+                dataOutputStream.writeUTF(command.getAddUser());
                 dataOutputStream.flush();
 
                 dataOutputStream.writeUTF(emailField.getText());
@@ -360,8 +357,7 @@ public class conexion {
 
         deleteButton.setOnAction(e -> {
             try {
-                // Envía los datos del nuevo usuario al servidor
-                dataOutputStream.writeUTF("eliminaUsuario");
+                dataOutputStream.writeUTF(command.getDeleteUser());
                 dataOutputStream.flush();
 
                 dataOutputStream.writeUTF(emailField.getText());
@@ -425,32 +421,40 @@ public class conexion {
         return key.getAlgorithm().equals("DH") && key.getEncoded().length > 0;
     }
 
-    public static void enviarArch(String filePath) throws IOException {
-        OutputStream outputStream = socket.getOutputStream();
-
-        FileInputStream fileInputStream = new FileInputStream(filePath);
+    public static void enviarArchivo(String filePath) throws IOException {
+        dataOutputStream.writeUTF(command.getUploadFile());
+        dataOutputStream.flush();
 
         File file = new File(filePath);
         long fileSize = file.length();
         String fileName = file.getName();
 
+        System.out.println("Enviando archivo: " + filePath + "de tamaño: " + fileSize + " bytes");
+
         // Enviar el nombre del archivo y su tamaño
-        DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
         dataOutputStream.writeUTF(fileName);
         dataOutputStream.writeLong(fileSize);
         dataOutputStream.flush();
 
-        System.out.println("Enviando archivo: " + fileName + " de tamaño: " + fileSize + " bytes");
+        FileInputStream fileInputStream = new FileInputStream(filePath);
 
         byte[] buffer = new byte[1024];
         int bytesRead;
-        while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, bytesRead);
-            outputStream.flush();
-        }
+        long totalBytesRead = 0;
 
+        while (totalBytesRead < fileSize && (bytesRead = fileInputStream.read(buffer)) != -1) {
+            try {
+                dataOutputStream.write(buffer, 0, bytesRead);
+                dataOutputStream.flush();
+                totalBytesRead += bytesRead;
+                
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         fileInputStream.close();
 
-        System.out.println("Archivo " + fileName + " enviado al servidor.");
+        System.out.println("Archivo enviado al servidor");
     }
 }
