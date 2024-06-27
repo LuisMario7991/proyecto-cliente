@@ -29,8 +29,8 @@ public class LoginScreen extends Application {
             }
 
             try {
-                String userType = conexion.login(usuario, contraseña);
-                conexion.displayUserInterface(userType, primaryStage);
+                String userType = Conexion.login(usuario, contraseña);
+                Conexion.displayUserInterface(userType, primaryStage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
