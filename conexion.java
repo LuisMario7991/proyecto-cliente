@@ -80,6 +80,8 @@ public class Conexion {
 
     protected static String login(String email, String password) {
         try {
+            System.out.println("Validando credenciales");
+
             dataOutputStream.writeUTF(email);
             dataOutputStream.flush();
             dataOutputStream.writeUTF(password);
@@ -89,6 +91,8 @@ public class Conexion {
 
             if (userType.equals("INVALID") || userType.equals("NOT_FOUND")) {
                 System.out.println("Error de autenticación: " + userType);
+            } else {
+                System.out.println("Bienvenido/a");
             }
 
             return userType;
