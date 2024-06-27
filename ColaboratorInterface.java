@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 public class ColaboratorInterface {
 
     public static void showColaboratorInterface(Stage primaryStage) {
-        primaryStage.setTitle("Pantalla con 3 Botones");
+        primaryStage.setTitle("Colaborador");
         Button btnFirmarAcuerdo = new Button("Firmar Acuerdo");
         Button btnDesencriptarReceta = new Button("Desencriptar Receta");
         Button btnSalir = new Button("Salir");

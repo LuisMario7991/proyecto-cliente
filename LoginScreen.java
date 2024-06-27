@@ -47,7 +47,7 @@ public class LoginScreen extends Application {
         // Configurar la escena principal y mostrar la ventana
         Scene scene = new Scene(grid, 300, 150);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("User Login");
+        primaryStage.setTitle("Login");
         primaryStage.show();
     }
 

@@ -22,7 +22,7 @@ public class AdminInterface {
     private static Commands command = new Commands();
 
     public static void showAdminInterface(Stage primaryStage) {
-        primaryStage.setTitle("File Sharing App");
+        primaryStage.setTitle("Administrador");
         Button subirButton = new Button("Subir");
         Button compartirButton = new Button("Compartir");
         Button validarButton = new Button("Validar");
