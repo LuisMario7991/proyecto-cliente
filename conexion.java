@@ -1,7 +1,11 @@
 import java.io.*;
 import java.math.BigInteger;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.*;
+import java.util.Arrays;
 
 import javax.crypto.*;
 import javax.crypto.spec.*;
@@ -75,7 +79,12 @@ public class Conexion {
         // Calcular hash SHA-256 de la clave compartida
         MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
         byte[] sharedSecretHash = sha256.digest(sharedSecret);
+        byte[] first16Bytes = Arrays.copyOf(sharedSecretHash, 16);
         System.out.println("Clave compartida hash (Alice): " + Utilidades.bytesToHex(sharedSecretHash));
+
+        // Guarda el hash en un archivo TXT
+        String fileName = "hasht.txt";
+        Files.write(Paths.get(fileName), first16Bytes, StandardOpenOption.CREATE);
     }
 
     protected static String login(String email, String password) {
