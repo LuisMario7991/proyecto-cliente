@@ -67,7 +67,7 @@ public class Utilidades {
         long fileSize = file.length();
         String fileName = file.getName();
 
-        System.out.println("Enviando archivo: " + fileName + "de tamaño: " + fileSize + " bytes");
+        System.out.println("Enviando archivo: " + fileName + " de tamaño: " + fileSize + " bytes");
 
         // Enviar el nombre del archivo y su tamaño
         Conexion.dataOutputStream.writeUTF(fileName);
