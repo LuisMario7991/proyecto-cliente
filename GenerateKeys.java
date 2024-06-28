@@ -13,15 +13,15 @@ public class GenerateKeys {
         PrivateKey privateKey = pair.getPrivate();
         PublicKey publicKey = pair.getPublic();
 
-        Files.write(Paths.get("privateKey.pem"), privateKey.getEncoded());
-        Files.write(Paths.get("publicKey.pem"), publicKey.getEncoded());
+        Files.write(Paths.get("Alice/privateKey.pem"), privateKey.getEncoded());
+        Files.write(Paths.get("Alice/publicKey.pem"), publicKey.getEncoded());
 
          // Print the content of the private key file
-         byte[] privateKeyBytes = Files.readAllBytes(Paths.get("privateKey.pem"));
+         byte[] privateKeyBytes = Files.readAllBytes(Paths.get("Alice/privateKey.pem"));
          System.out.println("Private Key:\n" + bytesToHex(privateKeyBytes));
  
          // Print the content of the public key file
-         byte[] publicKeyBytes = Files.readAllBytes(Paths.get("publicKey.pem"));
+         byte[] publicKeyBytes = Files.readAllBytes(Paths.get("Alice/publicKey.pem"));
          System.out.println("Public Key:\n" + bytesToHex(publicKeyBytes));
     }
 
