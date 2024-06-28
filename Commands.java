@@ -1,15 +1,33 @@
 
 public class Commands {
+    private String uploadAzure;
+    private String shareFile;
+    private String validateFiles;
     private String uploadFile;
     private String addUser;
     private String deleteUser;
     private String finishConnection;
 
     protected Commands() {
+        this.uploadAzure = "subeArchivo";
+        this.shareFile = "comparteArchivo";
+        this.validateFiles = "validaArchivo";
         this.uploadFile = "recibeArchivo";
         this.addUser = "agregaUsuario";
         this.deleteUser = "eliminaUsuario";
         this.finishConnection = "terminaConexion";
+    }
+
+    public String getUploadAzure() {
+        return uploadAzure;
+    }
+
+    public String getShareFile() {
+        return shareFile;
+    }
+
+    public String getValidateFiles() {
+        return validateFiles;
     }
 
     public String getUploadFile() {
