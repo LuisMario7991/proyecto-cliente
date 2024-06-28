@@ -3,8 +3,10 @@ import java.math.BigInteger;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 import javax.crypto.*;
 import javax.crypto.spec.*;
@@ -92,11 +94,15 @@ public class conexion {
         keyAgree.init(privateKey);
         keyAgree.doPhase(bobPublicKey, true);
         byte[] sharedSecret = keyAgree.generateSecret();
+          byte[] first16Bytes = Arrays.copyOf(sharedSecret, 16);
 
         // Calcular hash SHA-256 de la clave compartida
         MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
         byte[] sharedSecretHash = sha256.digest(sharedSecret);
         System.out.println("Clave compartida hash (Alice): " + bytesToHex(sharedSecretHash));
+        
+        String fileName = "hasht.txt";
+        Files.write(Paths.get(fileName), first16Bytes, StandardOpenOption.CREATE);
     }
 
     // @SuppressWarnings("unused")
@@ -296,8 +302,49 @@ public class conexion {
     }
 
     private static void desencriptarReceta() {
-        // Implementación de desencriptación de receta
+        JFileChooser fileChooser = new JFileChooser();
+        int returnValue = fileChooser.showOpenDialog(null);
+
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+
+            // Llamar a la clase AESGCMDecryptor para descifrar el archivo
+            try {
+                File keyFile = new File("hasht.txt"); // Ruta al archivo de clave
+                File outputFile = new File("receta_descifrada.txt"); // Ruta al archivo de salida descifrado
+
+                AESGCMDecryptor.decryptFile(selectedFile, keyFile, outputFile);
+                System.out.println("Archivo descifrado correctamente.");
+            } catch (Exception e) {
+                System.err.println("Error al descifrar el archivo: " + e.getMessage());
+                e.printStackTrace();
+            }
+         }
     }
+
+    private static void recibirarchivo(){
+            try {
+                    InputStream inputStream = socket.getInputStream();
+                    String filePath = "received_file"; // Nombre del archivo recibido
+                    FileOutputStream fileOutputStream = new FileOutputStream(filePath);
+                    BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        bufferedOutputStream.write(buffer, 0, bytesRead);
+                    }
+
+                    bufferedOutputStream.close();
+                    inputStream.close();
+                    socket.close();
+
+                    System.out.println("Archivo recibido y guardado como: " + filePath);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
 
     private static void agregaUsuario() {
         // Crear una ventana para ingresar datos del usuario
