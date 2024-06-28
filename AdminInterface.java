@@ -3,6 +3,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.crypto.spec.DHParameterSpec;
 import javax.swing.JFileChooser;
 
 import javafx.scene.Scene;
@@ -26,6 +27,7 @@ public class AdminInterface {
         Button validarButton = new Button("Validar");
         Button agregarButton = new Button("Agregar usuario");
         Button eliminarButton = new Button("Eliminar usuario");
+        Button generarParamsButton = new Button("Generar parámetros Diffie-Hellman");
         Button salirButton = new Button("Salir");
 
         subirButton.setOnAction(e -> subirArchivo());
@@ -33,13 +35,11 @@ public class AdminInterface {
         validarButton.setOnAction(e -> validarArchivo());
         agregarButton.setOnAction(e -> agregaUsuario());
         eliminarButton.setOnAction(e -> eliminaUsuario());
-        salirButton.setOnAction(e -> {
-            Conexion.cerrarConexion();
-            primaryStage.close();
-        });
+        generarParamsButton.setOnAction(e -> generaParams());
+        salirButton.setOnAction(e -> salir(primaryStage));
 
         VBox vbox = new VBox(10, subirButton, compartirButton, validarButton, agregarButton, eliminarButton,
-                salirButton);
+                generarParamsButton, salirButton);
         Scene scene = new Scene(vbox, 300, 200);
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -49,17 +49,19 @@ public class AdminInterface {
         // Crear un selector de archivos usando JFileChooser
         JFileChooser fileChooser = new JFileChooser();
         int returnValue = fileChooser.showOpenDialog(null);
-
+        
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             try {
+                Conexion.dataOutputStream.writeUTF(command.getUploadAzure());
                 File selectedFile = fileChooser.getSelectedFile();
-
-                OutputStream outputStream = Conexion.socket.getOutputStream(); // Pruebas
 
                 FileInputStream fileInputStream = new FileInputStream(selectedFile);
 
                 long fileSize = selectedFile.length();
                 String fileName = selectedFile.getName();
+
+                // Conexion.dataOutputStream.writeUTF(command.getUploadFile());
+                // Conexion.dataOutputStream.flush();
 
                 // Enviar el nombre del archivo y su tamaño
                 Conexion.dataOutputStream.writeUTF(fileName);
@@ -71,8 +73,8 @@ public class AdminInterface {
                 byte[] buffer = new byte[1024];
                 int bytesRead;
                 while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                    outputStream.flush();
+                    Conexion.dataOutputStream.write(buffer, 0, bytesRead);
+                    Conexion.dataOutputStream.flush();
                 }
 
                 fileInputStream.close();
@@ -88,10 +90,13 @@ public class AdminInterface {
     private static void compartirArchivo() {
         // Lógica para compartir archivo
         System.out.println("Compartiendo archivo...");
-        // Aquí se debería implementar la lógica para enviar el archivo al cliente
-        // mediante sockets
-        // Ejemplo básico:
-        // enviarArchivoAlCliente();
+        AzureBlobManager.launch(AzureBlobManager.class);
+        String localFilePath = "downloaded_receta";
+        try {
+            Utilidades.enviarArchivo(localFilePath);
+        } catch (IOException e) {
+            System.err.println("Error al comparit archivo: " + e.getMessage());
+        }
     }
 
     private static void validarArchivo() {
@@ -103,7 +108,8 @@ public class AdminInterface {
             // Comparar los hashes
             boolean isMatch = Conexion.dataInputStream.readBoolean();
             String validationText = (isMatch) ? "Validación exitosa:" : "Validación fallida:";
-            String messageText = (isMatch) ? "El acuerdo fue verificado y cumple con los requisitos." : "El acuerdo no coincide. Pida que firmen el acuerdo nuevamente.";
+            String messageText = (isMatch) ? "El acuerdo fue verificado y cumple con los requisitos."
+                    : "El acuerdo no coincide. Pida que firmen el acuerdo nuevamente.";
 
             // Crear una ventana para ingresar datos del usuario
             Stage stage = new Stage();
@@ -213,5 +219,24 @@ public class AdminInterface {
         Scene scene = new Scene(grid);
         stage.setScene(scene);
         stage.show();
+    }
+
+    private static void generaParams() {
+        try {
+            DHKeyExchange.ServerDH dhKeyExchange = new DHKeyExchange.ServerDH();
+            DHParameterSpec dhParametersSpecs = dhKeyExchange.getDhSpec();
+            DHKeyExchange.DHParams dhParams = new DHKeyExchange.DHParams(dhParametersSpecs.getP(),
+                    dhParametersSpecs.getG(), dhParametersSpecs.getL());
+
+            dhParams.saveToFile("Bob/dh_params", dhParams);
+            Utilidades.enviarArchivo("Bob/dh_params");
+        } catch (Exception e) {
+            System.err.println("Hubo un error al generar parámetro Diffie-Hellman: " + e.getMessage());
+        }
+    }
+
+    private static void salir(Stage stage) {
+        Conexion.cerrarConexion();
+        stage.close();
     }
 }
