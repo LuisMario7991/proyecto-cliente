@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import javax.crypto.spec.DHParameterSpec;
 import javax.swing.JFileChooser;
