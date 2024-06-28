@@ -2,8 +2,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.MessageDigest;
-import java.security.PublicKey;
 
 import javax.swing.JFileChooser;
 
@@ -98,21 +96,37 @@ public class AdminInterface {
 
     private static void validarArchivo() {
         try {
-            // Aplicar hash SHA-256 al archivo 'm.txt'
-            byte[] fileHash;
-            fileHash = Utilidades.hashFile("received_m.txt");
-            PublicKey publicKey = Utilidades.getPublicKeyFromFile("receivedPublicKey.pem");
+            System.out.println("Validando archivo en el serivdor");
 
-            byte[] decryptedHash = Utilidades.decryptWithPublicKey("received_encrypted_hash.bin",
-                    publicKey);
-
-            // Aplicar hash SHA-256 al resultado del descifrado
-            byte[] decryptedHashFileHash = Utilidades.hashBytes(decryptedHash);
+            Conexion.dataOutputStream.writeUTF(command.getValidateFiles());
 
             // Comparar los hashes
-            boolean isMatch = MessageDigest.isEqual(fileHash, decryptedHashFileHash);
-            System.out.println("Hash comparison result: " + (isMatch ? "MATCH" : "DO NOT MATCH"));
-            System.out.println("Validando archivo...");
+            boolean isMatch = Conexion.dataInputStream.readBoolean();
+            String validationText = (isMatch) ? "Validación exitosa:" : "Validación fallida:";
+            String messageText = (isMatch) ? "El acuerdo fue verificado y cumple con los requisitos." : "El acuerdo no coincide. Pida que firmen el acuerdo nuevamente.";
+
+            // Crear una ventana para ingresar datos del usuario
+            Stage stage = new Stage();
+            GridPane grid = new GridPane();
+            Button acceptButton = new Button("Aceptar");
+
+            grid.add(new Label("               "), 1, 0);
+            grid.add(new Label("        "), 0, 1);
+            grid.add(new Label(validationText), 1, 1);
+            grid.add(new Label("        "), 2, 1);
+            grid.add(new Label("        "), 0, 2);
+            grid.add(new Label(messageText), 1, 2);
+            grid.add(new Label("        "), 2, 2);
+            grid.add(new Label("               "), 1, 3);
+            grid.add(acceptButton, 1, 4);
+            grid.add(new Label("               "), 1, 5);
+
+            acceptButton.setOnAction(e -> stage.close());
+
+            Scene scene = new Scene(grid);
+            stage.setScene(scene);
+            stage.setTitle("Validación de Acuerdo");
+            stage.show();
 
         } catch (Exception e) {
             e.printStackTrace();
