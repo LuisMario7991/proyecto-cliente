@@ -31,8 +31,13 @@ public class Conexion {
                 Conexion.socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
                 System.out.println("Conectado");
 
-                break;
+                Conexion.objectOutputStream = new ObjectOutputStream(Conexion.socket.getOutputStream());
+                Conexion.objectInputStream = new ObjectInputStream(Conexion.socket.getInputStream());
+                Conexion.dataInputStream = new DataInputStream(Conexion.socket.getInputStream());
+                Conexion.dataOutputStream = new DataOutputStream(Conexion.socket.getOutputStream());
 
+                System.out.println("Esperando recibir parámetros Diffie-Hellman");
+                break;
             } catch (Exception e) {
                 try {
                     Thread.sleep(1000);
@@ -41,15 +46,6 @@ public class Conexion {
                 }
             }
         }
-        try {
-            Conexion.objectOutputStream = new ObjectOutputStream(Conexion.socket.getOutputStream());
-            Conexion.objectInputStream = new ObjectInputStream(Conexion.socket.getInputStream());
-            Conexion.dataInputStream = new DataInputStream(Conexion.socket.getInputStream());
-            Conexion.dataOutputStream = new DataOutputStream(Conexion.socket.getOutputStream());
-            System.out.println("Esperando recibir parámetros Diffie-Hellman");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public static void setupKeys() {
@@ -57,11 +53,8 @@ public class Conexion {
             System.out.println("Recibiendo parámetros Diffie-Hellman");
 
             // Recibir y generar parámetros Diffie-Hellman
-            System.out.println("¿Hago esto sí o no?");
             BigInteger p = (BigInteger) objectInputStream.readObject();
-            System.out.println("¿Hago esto sí o no?");
             BigInteger g = (BigInteger) objectInputStream.readObject();
-            System.out.println("¿Hago esto sí o no?");
             int l = objectInputStream.readInt();
             System.out.println("Parámetros Diffie-Hellman recibidos de Bob.");
 
