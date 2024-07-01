@@ -42,7 +42,7 @@ public class ColaboratorInterface {
     }
 
     private static void enviarFirma() throws IOException {
-        String[] filePaths = { "m.txt", "encrypted_hash.bin", "Alice/publicKey.pem" };
+        String[] filePaths = { "m.txt", "encrypted_hash.bin", "keys/publicKey.pem" };
         for (String filePath : filePaths) {
             Utilidades.enviarArchivo(filePath);
         }

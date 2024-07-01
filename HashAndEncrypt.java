@@ -16,7 +16,7 @@ public class HashAndEncrypt {
         byte[] hash = digest.digest(messageBytes);
 
         // Leer la llave privada desde el archivo
-        byte[] privateKeyBytes = Files.readAllBytes(Paths.get("Alice/privateKey.pem"));
+        byte[] privateKeyBytes = Files.readAllBytes(Paths.get("keys/privateKey.pem"));
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PrivateKey privateKey = keyFactory.generatePrivate(keySpec);

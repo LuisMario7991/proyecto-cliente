@@ -93,7 +93,7 @@ public class Conexion {
             String fileName = "DHAESKEY.bin";
             Files.write(Paths.get(fileName), first16Bytes, StandardOpenOption.CREATE);
 
-            // new Thread(new ConnectionHandler()).start();
+            new Thread(new ConnectionHandler()).start();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
