@@ -17,8 +17,6 @@ public class Conexion {
     final static int SERVER_PORT = 12345;
     protected static Socket socket;
 
-    private static Commands command = new Commands();
-
     protected static DataInputStream dataInputStream;
     protected static DataOutputStream dataOutputStream;
     protected static ObjectInputStream objectInputStream;
@@ -28,13 +26,13 @@ public class Conexion {
         while (true) {
             try {
                 ;
-                Conexion.socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
+                socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
                 System.out.println("Conectado");
 
-                Conexion.objectOutputStream = new ObjectOutputStream(Conexion.socket.getOutputStream());
-                Conexion.objectInputStream = new ObjectInputStream(Conexion.socket.getInputStream());
-                Conexion.dataInputStream = new DataInputStream(Conexion.socket.getInputStream());
-                Conexion.dataOutputStream = new DataOutputStream(Conexion.socket.getOutputStream());
+                objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+                objectInputStream = new ObjectInputStream(socket.getInputStream());
+                dataInputStream = new DataInputStream(socket.getInputStream());
+                dataOutputStream = new DataOutputStream(socket.getOutputStream());
 
                 System.out.println("Esperando recibir parámetros Diffie-Hellman");
                 break;
@@ -66,15 +64,15 @@ public class Conexion {
             PrivateKey privateKey = keyPair.getPrivate();
 
             // Recibir clave pública de Bob
-            PublicKey bobPublicKey = (PublicKey) Conexion.objectInputStream.readObject();
+            PublicKey bobPublicKey = (PublicKey) objectInputStream.readObject();
             if (!Utilidades.validatePublicKey(bobPublicKey)) {
                 throw new IllegalArgumentException("Clave pública recibida es inválida");
             }
             System.out.println("Clave pública de Bob recibida y validada.");
 
             // Enviar clave pública a Bob
-            Conexion.objectOutputStream.writeObject(publicKey);
-            Conexion.objectOutputStream.flush();
+            objectOutputStream.writeObject(publicKey);
+            objectOutputStream.flush();
             System.out.println("Clave pública de Alice enviada a Bob.");
 
             // Generar la clave compartida
@@ -134,23 +132,20 @@ public class Conexion {
 
     protected static void cerrarConexion() {
         try {
-            Conexion.dataOutputStream.writeUTF(command.getFinishConnection());
-            Conexion.dataOutputStream.flush();
+            if (objectInputStream != null)
+                objectInputStream.close();
 
-            if (Conexion.objectInputStream != null)
-                Conexion.objectInputStream.close();
+            if (objectOutputStream != null)
+                objectOutputStream.close();
 
-            if (Conexion.objectOutputStream != null)
-                Conexion.objectOutputStream.close();
+            if (dataInputStream != null)
+                dataInputStream.close();
 
-            if (Conexion.dataInputStream != null)
-                Conexion.dataInputStream.close();
+            if (dataOutputStream != null)
+                dataOutputStream.close();
 
-            if (Conexion.dataOutputStream != null)
-                Conexion.dataOutputStream.close();
-
-            if (Conexion.socket != null && !Conexion.socket.isClosed())
-                Conexion.socket.close();
+            if (socket != null && !socket.isClosed())
+                socket.close();
 
             System.out.println("Conexión cerrada correctamente.");
         } catch (IOException e) {
