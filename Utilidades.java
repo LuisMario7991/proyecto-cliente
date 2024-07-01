@@ -59,6 +59,7 @@ public class Utilidades {
 
         // Enviar el nombre del archivo y su tamaño
         Conexion.dataOutputStream.writeUTF(fileName);
+        Conexion.dataOutputStream.flush();
         Conexion.dataOutputStream.writeLong(fileSize);
         Conexion.dataOutputStream.flush();
 
