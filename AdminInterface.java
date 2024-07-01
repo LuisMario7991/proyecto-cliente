@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.crypto.spec.DHParameterSpec;
@@ -48,7 +49,7 @@ public class AdminInterface {
         // Crear un selector de archivos usando JFileChooser
         JFileChooser fileChooser = new JFileChooser();
         int returnValue = fileChooser.showOpenDialog(null);
-        
+
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             try {
                 Conexion.dataOutputStream.writeUTF(command.getUploadAzure());
@@ -88,13 +89,50 @@ public class AdminInterface {
 
     private static void compartirArchivo() {
         // Lógica para compartir archivo
-        System.out.println("Compartiendo archivo...");
-        AzureBlobManager.launch(AzureBlobManager.class);
-        String localFilePath = "downloaded_receta";
         try {
-            Utilidades.enviarArchivo(localFilePath);
+            System.out.println("Compartiendo archivo...");
+
+            Conexion.dataOutputStream.writeUTF(command.getShareFile());
+
+            // Crear una ventana para ingresar datos del usuario
+            Stage stage = new Stage();
+            GridPane grid = new GridPane();
+            TextField fileField = new TextField();
+            Button sendButton = new Button("Agregar");
+
+            grid.add(new Label("Nombre del archivo:"), 0, 0);
+            grid.add(fileField, 1, 0);
+            grid.add(sendButton, 1, 1);
+
+            sendButton.setOnAction(e -> {
+                try {
+                    Conexion.dataOutputStream.writeUTF(fileField.getText());
+
+                    // Enviar el nombre del archivo y su tamaño
+                    String fileName = Conexion.dataInputStream.readUTF();
+                    long fileSize = Conexion.dataInputStream.readLong();
+
+                    byte[] fileData = new byte[(int) fileSize]; 
+                    Conexion.dataInputStream.readFully(fileData);
+
+                    // Guardar los bytes en un archivo local
+                    try (FileOutputStream fileOutputStream = new FileOutputStream(fileName)) {
+                        fileOutputStream.write(fileData);
+                        System.out.println("Archivo guardado: " + fileName + " (" + fileSize + " bytes)");
+                    }
+
+                    stage.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            });
+
+            Scene scene = new Scene(grid);
+            stage.setScene(scene);
+            stage.setTitle("Validación de Acuerdo");
+            stage.show();
         } catch (IOException e) {
-            System.err.println("Error al comparit archivo: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
