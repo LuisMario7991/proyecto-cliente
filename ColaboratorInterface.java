@@ -55,13 +55,24 @@ public class ColaboratorInterface {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
 
+            String selectedFileName = selectedFile.getName();
+
+            String prefix = "Encrypted";
+            if (selectedFileName.startsWith(prefix)) {
+                selectedFileName = selectedFileName.substring(prefix.length());
+            }
+
+            // Añadir el sufijo "_descifrado" manteniendo la extensión original
+            String outputFileName = selectedFileName;
+
+            // Crear un archivo de salida en el mismo directorio con el nuevo nombre
+            File outputFile = new File(selectedFile.getParent(), outputFileName);
+
             // Llamar a la clase AESGCMDecryptor para descifrar el archivo
             try {
-                File keyFile = new File("hasht.txt"); // Ruta al archivo de clave
-                File outputFile = new File("receta_descifrada.txt"); // Ruta al archivo de salida descifrado
-
+                File keyFile = new File("DHAESKEY.bin"); // Ruta al archivo de clave
                 AESGCMDecryptor.decryptFile(selectedFile, keyFile, outputFile);
-                System.out.println("Archivo descifrado correctamente.");
+                System.out.println("Archivo descifrado correctamente en: " + outputFile.getPath());
             } catch (Exception e) {
                 System.err.println("Error al descifrar el archivo: " + e.getMessage());
                 e.printStackTrace();
