@@ -63,6 +63,7 @@ public class ColaboratorInterface {
             try {
                 File keyFile = new File("DHAESKEY.bin"); // Ruta al archivo de clave
                 AESGCMDecryptor.decryptFile(selectedFile, keyFile, outputFile);
+                selectedFile.delete();
                 System.out.println("Archivo descifrado correctamente en: " + outputFile.getPath());
             } catch (Exception e) {
                 System.err.println("Error al descifrar el archivo: " + e.getMessage());
