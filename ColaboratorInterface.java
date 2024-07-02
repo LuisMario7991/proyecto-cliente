@@ -37,7 +37,7 @@ public class ColaboratorInterface {
     }
 
     private static void enviarFirma() throws IOException {
-        String[] filePaths = { "m.txt", "encrypted_hash.bin", "Alice/publicKey.pem" };
+        String[] filePaths = { "m.txt", "encrypted_hash.bin", "keys/publicKey.pem" };
         for (String filePath : filePaths) {
             Utilidades.enviarArchivo(filePath);
         }
@@ -50,13 +50,20 @@ public class ColaboratorInterface {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
 
-            // Llamar a la clase AESGCMDecryptor para descifrar el archivo
-            try {
-                File keyFile = new File("hasht.txt"); // Ruta al archivo de clave
-                File outputFile = new File("receta_descifrada.txt"); // Ruta al archivo de salida descifrado
+            String selectedFileName = selectedFile.getName();
 
+            String prefix = "Encrypted";
+            if (selectedFileName.startsWith(prefix)) {
+                selectedFileName = selectedFileName.substring(prefix.length());
+            }
+
+            String outputFileName = selectedFileName;
+            File outputFile = new File(selectedFile.getParent(), outputFileName);
+
+            try {
+                File keyFile = new File("DHAESKEY.bin"); // Ruta al archivo de clave
                 AESGCMDecryptor.decryptFile(selectedFile, keyFile, outputFile);
-                System.out.println("Archivo descifrado correctamente.");
+                System.out.println("Archivo descifrado correctamente en: " + outputFile.getPath());
             } catch (Exception e) {
                 System.err.println("Error al descifrar el archivo: " + e.getMessage());
                 e.printStackTrace();
