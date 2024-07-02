@@ -7,6 +7,9 @@ public class CommandProcessor {
             case "enviaArchivo":
                 FileManagement.recibirArchivo();
                 break;
+            case "comparteArchivo":
+                FileManagement.recibirArchivo();
+                break;
             case "terminaConexion":
                 Conexion.cerrarConexion();
                 break;

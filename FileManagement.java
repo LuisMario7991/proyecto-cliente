@@ -8,11 +8,10 @@ public class FileManagement {
         try {
             String fileName = Conexion.dataInputStream.readUTF();
             long fileSize = Conexion.dataInputStream.readLong();
-            String saveFilePath = "recibido_" + fileName;
 
             System.out.println("Recibiendo archivo: " + fileName + " de tamaño: " + fileSize + " bytes");
 
-            try (FileOutputStream fileOutputStream = new FileOutputStream(saveFilePath);
+            try (FileOutputStream fileOutputStream = new FileOutputStream(fileName);
                     BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream)) {
 
                 byte[] buffer = new byte[1024];
@@ -27,7 +26,7 @@ public class FileManagement {
                 bufferedOutputStream.flush(); // Asegurar que todataOutputStream los datos han sido escritos
 
                 if (totalBytesRead == fileSize) {
-                    System.out.println("Archivo recibido correctamente y guardado como " + saveFilePath);
+                    System.out.println("Archivo recibido correctamente y guardado como " + fileName);
 
                 } else {
                     System.out.println("Error: El tamaño del archivo recibido (" + totalBytesRead
